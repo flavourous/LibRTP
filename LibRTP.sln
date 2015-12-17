@@ -1,0 +1,19 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibRTP.Test", "LibRTP.Test\LibRTP.Test.csproj", "{B1723787-D708-4B2C-BBBA-B01A5A1DFC7B}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "LibRTP", "LibRTP\LibRTP.shproj", "{1C3091EB-5350-48F8-AA8A-51E7D4656DA0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B1723787-D708-4B2C-BBBA-B01A5A1DFC7B}.Debug|x86.ActiveCfg = Debug|x86
+		{B1723787-D708-4B2C-BBBA-B01A5A1DFC7B}.Debug|x86.Build.0 = Debug|x86
+		{B1723787-D708-4B2C-BBBA-B01A5A1DFC7B}.Release|x86.ActiveCfg = Release|x86
+		{B1723787-D708-4B2C-BBBA-B01A5A1DFC7B}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+EndGlobal
