@@ -12,6 +12,7 @@
 //		simply help if specced by moving the initial date to a round number of the units of the first array type.
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.IO;
 
 namespace LibRTP
 {
@@ -176,6 +177,37 @@ namespace LibRTP
 			this.lowerBound = lowerBound;
 			this.upperBound = upperBound;
 		}
+		public byte[] ToBinary()
+		{
+			using (MemoryStream ms = new MemoryStream ())
+			using (BinaryWriter bw = new BinaryWriter (ms)) {
+				bw.Write (FixedPoint.ToBinary ());
+				bw.Write (frequency);
+				bw.Write ((uint)units);
+				bw.Write (lowerBound.HasValue);
+				if (lowerBound.HasValue)
+					bw.Write (lowerBound.Value.ToBinary ());
+				bw.Write (upperBound.HasValue);
+				if (upperBound.HasValue)
+					bw.Write (upperBound.Value.ToBinary ());
+				return ms.ToArray ();
+			}
+		}
+		public static RecurrsEveryPattern FromBinary(byte[] data)
+		{
+			using (MemoryStream ms = new MemoryStream (data))
+			using (BinaryReader br = new BinaryReader (ms)) {
+				var fp = DateTime.FromBinary (br.ReadInt64 ());
+				var frq = br.ReadInt32 ();
+				var units = (RecurrSpan)br.ReadUInt32 ();
+				DateTime? lb = null, ub = null;
+				if (br.ReadBoolean ())
+					lb = DateTime.FromBinary (br.ReadInt64 ());
+				if (br.ReadBoolean ())
+					ub = DateTime.FromBinary (br.ReadInt64 ());
+				return new RecurrsEveryPattern (fp, frq, units, lb, ub);
+			}
+		}
 		#region IRecurr implementation
 		public IEnumerable<DateTime> GetOccurances (DateTime Start, DateTime End)
 		{
@@ -193,8 +225,8 @@ namespace LibRTP
 	}
 	public class RecurrsOnPattern : IRecurr
 	{
-		readonly DateTime PatternStarts; 
-		readonly DateTime PatternEnds;
+		readonly DateTime? PatternStarts; 
+		readonly DateTime? PatternEnds;
 		readonly IList<RecurrSpan> units;
 		readonly int[] onIndexes;
 
@@ -202,7 +234,7 @@ namespace LibRTP
 		// on the  idx[0] flag[0] of the idx[1] flag[1] of the idx[2] flag[2] of the flag[3]
 		// eg on the 1st day of the 2nd week of the 7th month of the year.
 		// so there must always be one more flag set than length of indexes.
-		public RecurrsOnPattern (int[] onIndexes, RecurrSpan unitsMask, DateTime patternStart, DateTime patternEnd)
+		public RecurrsOnPattern (int[] onIndexes, RecurrSpan unitsMask, DateTime? patternStart, DateTime? patternEnd)
 		{
 			if(onIndexes.Length == 0) throw new ArgumentException("There must be some indexes specified", "onIndexes.Length");
 
@@ -223,11 +255,49 @@ namespace LibRTP
 			PatternEnds = patternEnd;
 		}
 
+		public byte[] ToBinary()
+		{
+			using (var ms = new MemoryStream ())
+			using (var bw = new BinaryWriter (ms)) {
+				bw.Write (onIndexes.Length);
+				for(int i=0;i<onIndexes.Length;i++)
+					bw.Write (onIndexes[i]);
+				uint umask = 0;
+				foreach (var um in units)
+					umask |= um;
+				bw.Write (umask);
+				bw.Write (PatternStarts.HasValue);
+				if (PatternStarts.HasValue)
+					bw.Write (PatternStarts.Value.ToBinary ());
+				bw.Write (PatternEnds.HasValue);
+				if (PatternEnds.HasValue)
+					bw.Write (PatternEnds.Value.ToBinary ());
+				return ms.ToArray ();
+			}
+		}
+		public static RecurrsOnPattern FromBinary(byte[] data)
+		{
+			using (var ms = new MemoryStream (data))
+			using (var br = new BinaryReader (ms)) {
+				int indexes = br.ReadInt32 ();
+				List<int> onIndexes = new List<int> ();
+				for (int i = 0; i < indexes; i++)
+					onIndexes.Add (br.ReadInt32 ());
+				uint umask = br.ReadUInt32 ();
+				DateTime? ps= null, pe = null;
+				if (br.ReadBoolean ())
+					ps = DateTime.FromBinary (br.ReadInt64 ());
+				if (br.ReadBoolean ())
+					pe = DateTime.FromBinary (br.ReadInt64 ());
+				return new RecurrsOnPattern (onIndexes.ToArray (), (RecurrSpan)umask, ps, pe);
+			}
+		}
+
 		#region IRecurr implementation
-		public IEnumerable<DateTime> GetOccurances (DateTime Start, DateTime end )
+		public IEnumerable<DateTime> GetOccurances (DateTime Start, DateTime end)
 		{
 			// Firstly, we might be before the pattern actually starts, limit that.
-			if(Start < PatternStarts) Start = PatternStarts;
+			if(PatternStarts.HasValue && Start < PatternStarts.Value) Start = PatternStarts.Value;
 
 			// go back through the indexes - we spam datetimes here, there should be a better way.
 			// we are computing like: "Set month of year to x, then set week of month to y, then set day of week to z"
@@ -256,7 +326,7 @@ namespace LibRTP
 
 			// then we go untill we pass this ending value
 			var formEnd = end;
-			if (formEnd > PatternEnds) formEnd = PatternEnds;
+			if (PatternEnds.HasValue && formEnd > PatternEnds.Value) formEnd = PatternEnds.Value;
 
 			// by consecutive increment and yielding
 			while(forming <= formEnd)
