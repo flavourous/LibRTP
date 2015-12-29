@@ -9,6 +9,9 @@
     <Import_RootNamespace>LibRTP</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)LibRTP.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RecurrsEveryPattern.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RecurrsOnPattern.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RecurringAggregatePattern.cs" />
   </ItemGroup>
 </Project>
