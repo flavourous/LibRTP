@@ -1,38 +1,51 @@
 ﻿using System;
 using System.Collections.Generic;
-};
+using System.Text;
 
 namespace LibRTP
 {
+	public enum AggregateRangeType { DaysFromStart = 1, DaysEitherSide = 2 }
 	public class RecurringAggregatePattern
 	{
-		public DateTime FixedStartingPoint;
-		public enum RangeType { DaysFromStart = 1, DaysEitherSide = 2 }
 		public readonly int[] DayPattern; 
 		public readonly double[] DayTargets; 
 		public readonly int DayTargetRange;
-		public readonly RangeType DayTargetRangeType; 
-		public RecurringAggregatePattern(DateTime fixedStartingPoint, int targetRange, RangeType rangetype, int[] targetPattern, double[] patternTarget)
+		public readonly AggregateRangeType DayTargetRangeType; 
+		readonly int totalPatternLength = 0;
+		public RecurringAggregatePattern(int targetRange, AggregateRangeType rangetype, int[] targetPattern, double[] patternTarget)
 		{
-			FixedStartingPoint = fixedStartingPoint;
 			DayTargetRange = targetRange;
 			DayTargetRangeType = rangetype;
 			DayPattern = targetPattern;
 			DayTargets = patternTarget;
-		}
-		public DayTargetReturn FindTargetForDay(DateTime dayStart)
-		{
-			var r = DayTargetRange;
-			var t = DayTargetRangeType;
 
 			// find the total length of the pattern
-			int totalPatternLength = 0;
+			totalPatternLength = 0;
 			foreach (var dp in DayPattern)
 				totalPatternLength += dp;
 
-			// f****k ok this is dumb ... lets return something here at least...
-			if (totalPatternLength == 0)
-				return new DayTargetReturn (dayStart, dayStart.AddDays (1), DayTargets.Length > 0 ? DayTargets [0] : 0.0);
+			// f****k ok this is dumb ... lets return something here at least... no I want faily!!
+			if (totalPatternLength <= 0) throw new ArgumentException("Pattern must have a positive length...");
+		}
+		public override string ToString ()
+		{
+			var ts = new String[DayTargets.Length];
+			for (int i = 0; i < DayTargets.Length; i++)
+				ts [i] = String.Format ("{0} days of {1}", DayPattern [i], DayTargets [i]);
+			return String.Format ("{0} - averaged {1} {2}", String.Join (", then ", ts), DayTargetRange, DayTargetRangeType.ToString ());
+		}
+		DateTime StartOfDay(DateTime somit)
+		{
+			return new DateTime (somit.Year, somit.Month, somit.Day);
+		}
+		public DayTargetReturn FindTargetForDay(DateTime fixedStartingPoint_in, DateTime dayStart_in)
+		{
+			// normalise input.
+			DateTime fixedStartingPoint = StartOfDay (fixedStartingPoint_in);
+			DateTime dayStart = StartOfDay (dayStart_in);
+
+			var r = DayTargetRange;
+			var t = DayTargetRangeType;
 
 			// easier to unwrap i think.
 			double[] unwrapped = new double[totalPatternLength];
@@ -42,7 +55,7 @@ namespace LibRTP
 					unwrapped [c++] = DayTargets [i];
 
 			//total days since started (big number)
-			var daysSinceStart = (dayStart - FixedStartingPoint).TotalDays;
+			var daysSinceStart = (dayStart - fixedStartingPoint).TotalDays;
 
 			// get the number of days into a pattern (could concieveably be negative)
 			var daysSincePatternStarted = (int)(daysSinceStart % totalPatternLength);
@@ -52,18 +65,17 @@ namespace LibRTP
 			double targ =0;
 			DateTime useStart = DateTime.MinValue, useEnd = DateTime.MinValue;
 			switch (t) {
-			case RecurringAggregatePattern.RangeType.DaysFromStart:
-				useStart = dayStart.AddDays (-daysSincePatternStarted);
+			case AggregateRangeType.DaysFromStart:
+				useStart = dayStart;
 				useEnd = dayStart.AddDays (r);
 				for (int ds = 0; ds < r; ds++)
-					targ += unwrapped [ds % totalPatternLength];
+					targ += unwrapped [(daysSincePatternStarted + ds) % totalPatternLength];
 				break;
-			case RecurringAggregatePattern.RangeType.DaysEitherSide:
+			case AggregateRangeType.DaysEitherSide:
 				useStart = dayStart.AddDays (-r);
-				useEnd = dayStart.AddDays (r);
-				var rs = daysSincePatternStarted + r;
-				for (int ds = daysSincePatternStarted - r; ds <= rs; ds++)
-					targ += unwrapped [Math.Abs(ds % totalPatternLength)];
+				useEnd = dayStart.AddDays (r + 1);
+				for (int ds = daysSincePatternStarted - r; ds <= daysSincePatternStarted + r; ds++)
+					targ += unwrapped [((ds % totalPatternLength) + totalPatternLength) % totalPatternLength];
 				break;
 			}
 			return new DayTargetReturn (useStart, useEnd, targ);
@@ -78,6 +90,10 @@ namespace LibRTP
 			this.begin=begin;
 			this.end=end;
 			this.target=target;
+		}
+		public override string ToString ()
+		{
+			return String.Format ("{0} to {1}: {2}", begin.ToShortDateString(), end.ToShortDateString(), target); 
 		}
 	}
 }

@@ -2,11 +2,25 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
+using System.Threading;
 
 namespace LibRTP.Test
 {
 	class MainClass
 	{
+		static readonly String[] green = new[] {
+			"      xxxxxx           xxxxxxxx            xxxxxxxxxxxxxxx    xxxxxxxxxxxxxxx    xxxxxx          xxxxx",
+			"    xxxxxxxxxx         xxxxxxxxxx          xxxxxxxxxxxxxxx    xxxxxxxxxxxxxxx    xxxxxxxx        xxxxx",
+			" xxxxx      xxxxx      xxxxx  xxxxxx       xxxxx              xxxxx              xxxxxxxxxx      xxxxx",
+			"xxxxx       xxxxx      xxxxx     xxxxx     xxxxx              xxxxx              xxxxx xxxxx     xxxxx",
+			"xxxxx                  xxxxx      xxxxx    xxxxxxxxx          xxxxxxxxx          xxxxx  xxxxx    xxxxx",
+			"xxxxx   xxxxxxx        xxxxx     xxxxx     xxxxxxxxxx         xxxxxxxxxx         xxxxx   xxxxx   xxxxx",
+			"xxxxx     xxxxxxx      xxxxxx  xxxxx       xxxxxxxxx          xxxxxxxxx          xxxxx    xxxxx  xxxxx",
+			"xxxxx        xxxxx     xxxxxxxxxxxxxx      xxxxx              xxxxx              xxxxx     xxxxx xxxxx",
+			" xxxxx      xxxxx      xxxxxx    xxxxx     xxxxx              xxxxx              xxxxx      xxxxxxxxxx",
+			"    xxxxxxxxxx         xxxxx      xxxxx    xxxxxxxxxxxxxxx    xxxxxxxxxxxxxxx    xxxxx        xxxxxxxx",
+			"      xxxxxx           xxxxx       xxxx    xxxxxxxxxxxxxxx    xxxxxxxxxxxxxxx    xxxxx          xxxxxx"
+		};
 		public static void Main (string[] args)
 		{
 			// Ad hock "testing framework"
@@ -14,17 +28,210 @@ namespace LibRTP.Test
 			opt.RunTests ();
 			var ept = new EveryPatternTests ();
 			ept.RunTests ();
-			Console.WriteLine ("Yayyy tests passed!!");
-			Console.BackgroundColor = ConsoleColor.Green;
-			Console.ForegroundColor = ConsoleColor.Black;
-			Console.WriteLine (new String ('G', Console.WindowWidth-1));
-			Console.WriteLine (new String ('r', Console.WindowWidth-1));
-			Console.WriteLine (new String ('e', Console.WindowWidth-1));
-			Console.WriteLine (new String ('e', Console.WindowWidth-1));
-			Console.WriteLine (new String ('n', Console.WindowWidth-1));
-			Console.ReadKey ();
+			var apt = new AggregatePatternTests ();
+			apt.RunTests ();
+
+			// show happy green screen!
+			int ctr = 0;
+			DrawGreen ();
+			Console.ForegroundColor = hl; 
+			while (true) {
+				UpdateGreen (ctr,ctr-4);
+				if (Console.KeyAvailable) break;
+				ctr += 4;
+				if (ctr > green [0].Length) {
+					ctr = 0;
+					Console.ForegroundColor = Console.ForegroundColor == hl ? nrm : hl;
+				}
+				Thread.Sleep (30);
+			}
+		}
+		static ConsoleColor nrm = ConsoleColor.Black, hl = ConsoleColor.Green;
+		static void DrawGreen()
+		{
+			Console.CursorVisible = false;
+			Console.ResetColor ();
+			Console.BackgroundColor = ConsoleColor.DarkGreen;
+			Console.ForegroundColor = nrm;
+			Console.Clear ();
+			int vofs = (Console.WindowHeight - green.Length)/2;
+			for (int i = 0; i < vofs; i++)
+				Console.WriteLine ();
+			int hofs = (Console.WindowWidth - green [0].Length)/2;
+			foreach (var l in green)
+				Console.WriteLine (new String (' ', hofs) + l);
+		}
+		static void UpdateGreen(int pos, int upos)
+		{
+			int vofs = (Console.WindowHeight - green.Length)/2;
+			int hofs = (Console.WindowWidth - green [0].Length)/2;
+
+			int rn = pos - upos;
+			Doit (pos, rn, hofs, vofs);
+		}
+		static void Doit(int start, int ln, int hofs, int vofs)
+		{
+			var uln = Math.Min (ln, green [0].Length - start);
+			if (start >= 0 && uln > 0)
+				for (int i = 0; i < green.Length; i++) {
+					Console.SetCursorPosition (hofs + start, vofs + i);
+					Console.Write (green [i].Substring (start, uln));
+				}
 		}
 	}
+
+	class AggregatePatternTests
+	{
+		class AggTest 
+		{
+			public RecurringAggregatePattern pat;
+			public DayTargetReturn[] res;
+			public DateTime fixedDate;
+			public DateTime[] startDate;
+		}
+		class AggList : List<AggTest>
+		{
+			public void Add(RecurringAggregatePattern pat,DateTime fixedDate, DateTime startDate, DayTargetReturn res)
+			{
+				Add (new AggTest () { pat = pat, fixedDate = fixedDate, startDate = new[] { startDate }, res = new[] { res } });
+			}
+			public void Add(RecurringAggregatePattern pat,DateTime fixedDate, DateTime[] startDates, DayTargetReturn[] ress)
+			{
+				Add (new AggTest () { pat = pat, fixedDate = fixedDate, startDate = startDates, res = ress });
+			}
+		}
+		AggList tests = new AggList 
+		{ 
+			//some simple tests.
+			{ 
+				new RecurringAggregatePattern (1, AggregateRangeType.DaysFromStart, new[] { 1 }, new[] { 100.0 }),
+				new DateTime (2015, 1, 1), new DateTime (2015, 1, 1),
+				new DayTargetReturn (new DateTime (2015, 1, 1), new DateTime (2015, 1, 2), 100.0)
+			},
+			{ 
+				new RecurringAggregatePattern (7, AggregateRangeType.DaysFromStart, new[] { 1 }, new[] { 100.0 }),
+				new DateTime (2015, 1, 1), new DateTime (2015, 1, 1),
+				new DayTargetReturn (new DateTime (2015, 1, 1), new DateTime (2015, 1, 8), 700.0)
+			},
+			{   
+				new RecurringAggregatePattern (0, AggregateRangeType.DaysEitherSide, new[] { 1 }, new[] { 100.0 }),
+				new DateTime (2015, 1, 1), new DateTime (2015, 1, 1),
+				new DayTargetReturn (new DateTime (2015, 1, 1), new DateTime (2015, 1, 2), 100.0)
+			},
+			{   
+				new RecurringAggregatePattern (3, AggregateRangeType.DaysEitherSide, new[] { 1 }, new[] { 100.0 }),
+				new DateTime (2015, 1, 1), new DateTime (2015, 1, 1),
+				new DayTargetReturn (new DateTime (2015, 1, 1).AddDays(-3), new DateTime (2015, 1, 2).AddDays(3), 700.0)
+			},
+
+			// Testing patterning is working.
+			{   
+				new RecurringAggregatePattern (1, AggregateRangeType.DaysFromStart, new[] { 3,2 }, new[] { 100.0, 50.0 }), 
+				new DateTime (2015, 1, 1),
+				new[] 
+				{ 
+					new DateTime (2015, 1, 1), 
+					new DateTime (2015, 1, 2), 
+					new DateTime (2015, 1, 3), 
+					new DateTime (2015, 1, 4), 
+					new DateTime (2015, 1, 5),
+					new DateTime (2014, 12, 31), 
+					new DateTime (2015, 1, 25),
+					new DateTime (2014, 12, 29), 
+				},
+				new[] 
+				{
+					new DayTargetReturn (new DateTime (2015, 1, 1), new DateTime (2015, 1, 2), 100.0),
+					new DayTargetReturn (new DateTime (2015, 1, 2), new DateTime (2015, 1, 3), 100.0),
+					new DayTargetReturn (new DateTime (2015, 1, 3), new DateTime (2015, 1, 4), 100.0),
+					new DayTargetReturn (new DateTime (2015, 1, 4), new DateTime (2015, 1, 5), 50.0),
+					new DayTargetReturn (new DateTime (2015, 1, 5), new DateTime (2015, 1, 6), 50.0),
+					new DayTargetReturn (new DateTime (2014, 12, 31), new DateTime (2015, 1, 1), 50.0),
+					new DayTargetReturn (new DateTime (2015, 1, 25), new DateTime (2015, 1, 26), 50.0),
+					new DayTargetReturn (new DateTime (2014, 12, 29), new DateTime (2014, 12, 30), 100.0),
+				}
+			},
+
+			// Testing patterning combined with windowing
+			{   
+				new RecurringAggregatePattern (5, AggregateRangeType.DaysFromStart, new[] { 2,1 }, new[] { 100.0, 50.0 }), 
+				new DateTime (2015, 1, 1),
+				new[] 
+				{ 
+					new DateTime (2015, 1, 1), 
+					new DateTime (2015, 1, 2), 
+					new DateTime (2015, 1, 3), 
+				},
+				new[] 
+				{
+					new DayTargetReturn (new DateTime (2015, 1, 1), new DateTime (2015, 1, 6), 450.0),
+					new DayTargetReturn (new DateTime (2015, 1, 2), new DateTime (2015, 1, 7), 400.0),
+					new DayTargetReturn (new DateTime (2015, 1, 3), new DateTime (2015, 1, 8), 400.0),
+				}
+			},
+			{   
+				new RecurringAggregatePattern (4, AggregateRangeType.DaysEitherSide, new[] { 2,1 }, new[] { 100.0, 50.0 }), 
+				new DateTime (2015, 1, 1),
+				new[] 
+				{ 
+					new DateTime (2015, 1, 1), 
+					new DateTime (2015, 1, 2), 
+					new DateTime (2015, 1, 3), 
+				},
+				new[] 
+				{
+					new DayTargetReturn (new DateTime (2014, 12, 28), new DateTime (2015, 1, 6), 750.0),
+					new DayTargetReturn (new DateTime (2014, 12, 29), new DateTime (2015, 1, 7), 750.0),
+					new DayTargetReturn (new DateTime (2014, 12, 30), new DateTime (2015, 1, 8), 750.0),
+				}
+			},
+
+			// testing dates before start date and windowings+patterns
+			{   
+				new RecurringAggregatePattern (1, AggregateRangeType.DaysEitherSide, new[] { 1,2,3,1 }, new[] { 10.0, 20.0, 30.0, 40.0 }), 
+				new DateTime (2015, 1, 31),
+				new[] 
+				{ 
+					new DateTime (2015, 1, 17), 
+					new DateTime (2015, 1, 16), 
+					new DateTime (2015, 1, 15), 
+					new DateTime (2015, 1, 14), 
+					new DateTime (2015, 1, 13), 
+					new DateTime (2015, 1, 12), 
+					new DateTime (2015, 1, 11), 
+				},
+				new[] 
+				{
+					new DayTargetReturn (new DateTime (2015, 1, 17-1), new DateTime (2015, 1, 17+2), 70.0),
+					new DayTargetReturn (new DateTime (2015, 1, 16-1), new DateTime (2015, 1, 16+2), 80.0),
+					new DayTargetReturn (new DateTime (2015, 1, 15-1), new DateTime (2015, 1, 15+2), 100.0),
+					new DayTargetReturn (new DateTime (2015, 1, 14-1), new DateTime (2015, 1, 14+2), 90.0),
+					new DayTargetReturn (new DateTime (2015, 1, 13-1), new DateTime (2015, 1, 13+2), 80.0),
+					new DayTargetReturn (new DateTime (2015, 1, 12-1), new DateTime (2015, 1, 12+2), 70.0),
+					new DayTargetReturn (new DateTime (2015, 1, 11-1), new DateTime (2015, 1, 11+2), 50.0),
+				}
+			},
+		};
+		public void RunTests()
+		{
+			RunTest (tests [tests.Count-1], 0);
+			foreach (var t in tests) 
+				for (int i = 0; i < t.res.Length; i++)
+					RunTest (t, i);
+		}
+		void RunTest(AggTest t, int i)
+		{
+			var res = t.res [i]; var sd = t.startDate [i];
+			var calc = t.pat.FindTargetForDay (t.fixedDate, sd);
+			String info = String.Format ("   Setup: {0}\n   Input: fixed at {1}, on day {2}\nExpected: {3}\n  Result: {4}", 
+				             t.pat.ToString (), t.fixedDate.ToShortDateString (), sd.ToShortDateString (), res, calc);
+			if (!(calc.begin == res.begin && calc.end == res.end && calc.target == res.target)) {
+				Console.WriteLine (info);
+				Debug.Assert (false, "See Console");
+			}
+		}
+	}
+
 	abstract class TestCase
 	{
 		protected abstract IRecurr d { get; }
@@ -55,6 +262,8 @@ namespace LibRTP.Test
 			Debug.Assert(ec is ArgumentException && (ec as ArgumentException).ParamName == expectedFailure);
 		}
 	}
+
+
 
 	class EveryPatternTests
 	{
