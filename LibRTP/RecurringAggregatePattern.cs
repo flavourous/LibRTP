@@ -34,15 +34,11 @@ namespace LibRTP
 				ts [i] = String.Format ("{0} days of {1}", DayPattern [i], DayTargets [i]);
 			return String.Format ("{0} - averaged {1} {2}", String.Join (", then ", ts), DayTargetRange, DayTargetRangeType.ToString ());
 		}
-		DateTime StartOfDay(DateTime somit)
-		{
-			return new DateTime (somit.Year, somit.Month, somit.Day);
-		}
 		public DayTargetReturn FindTargetForDay(DateTime fixedStartingPoint_in, DateTime dayStart_in)
 		{
 			// normalise input.
-			DateTime fixedStartingPoint = StartOfDay (fixedStartingPoint_in);
-			DateTime dayStart = StartOfDay (dayStart_in);
+			DateTime fixedStartingPoint = fixedStartingPoint_in.StartOfDay ();
+			DateTime dayStart = dayStart_in.StartOfDay ();
 
 			var r = DayTargetRange;
 			var t = DayTargetRangeType;

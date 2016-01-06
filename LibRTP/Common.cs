@@ -31,6 +31,10 @@ namespace LibRTP
 
 	static class OurHelpers
 	{
+		public static DateTime StartOfDay(this DateTime somit)
+		{
+			return new DateTime (somit.Year, somit.Month, somit.Day);
+		}
 		public static DateTime FirstWeekOfYear(this DateTime value)
 		{
 			var nval = value.AddDays (-value.DayOfYear);

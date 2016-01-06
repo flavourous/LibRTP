@@ -280,25 +280,25 @@ namespace LibRTP.Test
 		}
 		List<TestCase> cases = new List<TestCase> {
 			// Some on-every test cases...
-			new EveryTestCase(new DateTime(2015,2,12),1,RecurrSpan.Day,null,null,new DateTime(1950,1,1),new DateTime(1950,1,5),
+			new EveryTestCase(new DateTime(2015,2,12),1,RecurrSpan.Day,null,null,new DateTime(1950,1,1),new DateTime(1950,1,6),
 				new[] { new DateTime(1950,1,1),new DateTime(1950,1,2),new DateTime(1950,1,3),new DateTime(1950,1,4),new DateTime(1950,1,5) }
 			),
-			new EveryTestCase(new DateTime(2015,2,3),1,RecurrSpan.Week,null,null,new DateTime(2015,2,10),new DateTime(2015,2,24),
+			new EveryTestCase(new DateTime(2015,2,3),1,RecurrSpan.Week,null,null,new DateTime(2015,2,10),new DateTime(2015,2,25),
 				new[] {new DateTime(2015,2,10),new DateTime(2015,2,17),new DateTime(2015,2,24) }
 			),
-			new EveryTestCase(new DateTime(2014,2,3),1,RecurrSpan.Month,null,null,new DateTime(2018,1,1),new DateTime(2018,4,1),
+			new EveryTestCase(new DateTime(2014,2,3),1,RecurrSpan.Month,null,null,new DateTime(2018,1,1),new DateTime(2018,4,2),
 				new[] {new DateTime(2018,1,3),new DateTime(2018,2,3),new DateTime(2018,3,3),}
 			),
 			// leap year handling madness
-			new EveryTestCase(new DateTime(2012,2,29),1,RecurrSpan.Year,null,null,new DateTime(2018,1,1),new DateTime(2022,1,1),
+			new EveryTestCase(new DateTime(2012,2,29),1,RecurrSpan.Year,null,null,new DateTime(2018,1,1),new DateTime(2022,1,2),
 				new[] {new DateTime(2018,3,1),new DateTime(2019,3,1),new DateTime(2020,2,29),new DateTime(2021,3,1)}
 			),
 			// impossible month handling
-			new EveryTestCase(new DateTime(2010,1,31),1,RecurrSpan.Month,null,null,new DateTime(2012,1,1),new DateTime(2012,5,1),
+			new EveryTestCase(new DateTime(2010,1,31),1,RecurrSpan.Month,null,null,new DateTime(2012,1,1),new DateTime(2012,5,2),
 				new[] {new DateTime(2012,1,31),new DateTime(2012,2,29),new DateTime(2012,3,31),new DateTime(2012,4,30)}
 			),
 			// detect long range code changes at aleast...didnt confirm if correct! lol.
-			new EveryTestCase(new DateTime(2015,2,12),1,RecurrSpan.Week,null,null,new DateTime(1950,1,1),new DateTime(1950,1,20),
+			new EveryTestCase(new DateTime(2015,2,12),1,RecurrSpan.Week,null,null,new DateTime(1950,1,1),new DateTime(1950,1,21),
 				new[] { new DateTime(1950,1,4),new DateTime(1950,1,11),new DateTime(1950,1,18) }
 			),
 			//thatll do for nows.
@@ -329,110 +329,83 @@ namespace LibRTP.Test
 		List<TestCase> cases = new List<TestCase> {
 			// for single concecutive pairs - pushing the last possible onindex
 			new OnTestCase (
-				new[] { 28,1 }, RecurrSpan.Day | RecurrSpan.Month, 
+				new[] { 28 }, RecurrSpan.Day | RecurrSpan.Month, 
 				DateTime.MinValue, DateTime.MaxValue, new DateTime (2015, 1, 1), new DateTime (2015, 4, 1),
 				new [] { new DateTime (2015, 1, 28), new DateTime (2015, 2, 28), new DateTime (2015, 3, 28) }
 			),
 			new OnTestCase (
-				new[] { 28,4 }, RecurrSpan.Day | RecurrSpan.Month, 
-				DateTime.MinValue, DateTime.MaxValue, new DateTime (2015, 1, 1), new DateTime (2015, 10, 1),
-				new [] { new DateTime (2015, 1, 28), new DateTime (2015, 5, 28), new DateTime (2015, 9, 28) }
-			),
-			new OnTestCase (
-				new[] { 365,1 }, RecurrSpan.Day | RecurrSpan.Year, 
-				DateTime.MinValue, DateTime.MaxValue, new DateTime (2015, 1, 1), new DateTime (2017, 12, 31),
+				new[] { 365 }, RecurrSpan.Day | RecurrSpan.Year, 
+				DateTime.MinValue, DateTime.MaxValue, new DateTime (2015, 1, 1), new DateTime (2018, 1, 1),
 				new [] { new DateTime (2015, 12, 31), new DateTime (2016, 12, 30), new DateTime (2017, 12, 31) }
 			),
 			new OnTestCase (
-				new[] { 365,2 }, RecurrSpan.Day | RecurrSpan.Year, 
-				DateTime.MinValue, DateTime.MaxValue, new DateTime (2015, 1, 1), new DateTime (2017, 12, 31),
-				new [] { new DateTime (2015, 12, 31), new DateTime (2017, 12, 31) }
-			),
-			new OnTestCase (
-				new[] { 7,1 }, RecurrSpan.Day | RecurrSpan.Week, 
+				new[] { 7 }, RecurrSpan.Day | RecurrSpan.Week, 
 				DateTime.MinValue, DateTime.MaxValue, new DateTime (2015, 1, 1), new DateTime (2015, 1, 31),
 				new [] { new DateTime (2015, 1, 4), new DateTime (2015, 1, 11), new DateTime (2015, 1, 18), new DateTime (2015, 1, 25) }
 			),
 			new OnTestCase (
-				new[] { 4,1 }, RecurrSpan.Week | RecurrSpan.Month, 
+				new[] { 4 }, RecurrSpan.Week | RecurrSpan.Month, 
 				DateTime.MinValue, DateTime.MaxValue, new DateTime (2015, 1, 1), new DateTime (2015, 4, 1),
 				new [] { new DateTime (2015, 1, 28), new DateTime (2015, 2, 28), new DateTime (2015, 3, 28) }
 			),
 			new OnTestCase (
-				new[] { 52,1 }, RecurrSpan.Week | RecurrSpan.Year, 
+				new[] { 52 }, RecurrSpan.Week | RecurrSpan.Year, 
 				DateTime.MinValue, DateTime.MaxValue, new DateTime (2015, 1, 1), new DateTime (2017, 1, 1),
 				new [] { new DateTime (2015, 12, 28), new DateTime (2016, 12, 26) }
 			),
 			new OnTestCase(
-				new[] { 12,1 }, RecurrSpan.Month | RecurrSpan.Year, 
-				DateTime.MinValue, DateTime.MaxValue, new DateTime (2015, 12, 1), new DateTime (2017, 12, 1),
+				new[] { 12 }, RecurrSpan.Month | RecurrSpan.Year, 
+				DateTime.MinValue, DateTime.MaxValue, new DateTime (2015, 12, 1), new DateTime (2018, 1, 1),
 				new [] { new DateTime (2015, 12, 1), new DateTime (2016, 12, 1), new DateTime (2017, 12, 1) }
 			),
 			// Triplets
 			new OnTestCase(
-				new[] { 4,3,1 }, RecurrSpan.Week | RecurrSpan.Month | RecurrSpan.Year, 
+				new[] { 4,3 }, RecurrSpan.Week | RecurrSpan.Month | RecurrSpan.Year, 
 				DateTime.MinValue, DateTime.MaxValue, new DateTime (2015, 1, 1), new DateTime (2017, 4, 1),
 				new [] { new DateTime (2015, 3, 28), new DateTime (2016, 3, 28), new DateTime (2017, 3, 28) }
 			),
 			new OnTestCase(
-				new[] { 4,3,2 }, RecurrSpan.Week | RecurrSpan.Month | RecurrSpan.Year, 
-				DateTime.MinValue, DateTime.MaxValue, new DateTime (2015, 1, 1), new DateTime (2017, 4, 1),
-				new [] { new DateTime (2015, 3, 28), new DateTime (2017, 3, 28) }
-			),
-			new OnTestCase(
-				new[] { 4,4,1 }, RecurrSpan.Day | RecurrSpan.Week | RecurrSpan.Month, 
+				new[] { 4,4 }, RecurrSpan.Day | RecurrSpan.Week | RecurrSpan.Month, 
 				DateTime.MinValue, DateTime.MaxValue, new DateTime (2015, 1, 1), new DateTime (2015, 4, 1),
 				new [] { new DateTime (2015, 1, 29), new DateTime (2015, 2, 26), new DateTime (2015, 3, 26) }
 			),
-			new OnTestCase(
-				new[] { 4,4,6 }, RecurrSpan.Day | RecurrSpan.Week | RecurrSpan.Month, 
-				DateTime.MinValue, DateTime.MaxValue, new DateTime (2015, 1, 1), new DateTime (2015, 12, 1),
-				new [] { new DateTime (2015, 1, 29), new DateTime (2015, 7, 30) }
-			),
 			// Quaddie
 			new OnTestCase(
-				new[] { 7,4,12,1 }, RecurrSpan.Day | RecurrSpan.Week | RecurrSpan.Month | RecurrSpan.Year, 
+				new[] { 7,4,12 }, RecurrSpan.Day | RecurrSpan.Week | RecurrSpan.Month | RecurrSpan.Year, 
 				DateTime.MinValue, DateTime.MaxValue, new DateTime (2015, 1, 1), new DateTime (2018, 4, 1),
 				new [] { new DateTime (2016, 1, 3), new DateTime (2017, 1, 1), new DateTime (2017, 12, 31) }
 			),
-			new OnTestCase(
-				new[] { 7,4,12,3 }, RecurrSpan.Day | RecurrSpan.Week | RecurrSpan.Month | RecurrSpan.Year, 
-				DateTime.MinValue, DateTime.MaxValue, new DateTime (2015, 1, 1), new DateTime (2019, 4, 1),
-				new [] { new DateTime (2016, 1, 3), new DateTime (2018, 12, 30)}
-			),
-
-		
 		};
 
 		List<TestCase> failedContracts = new List<TestCase>
 		{
 			// out of ranges
 			new OnTestCase (
-				new[] { 13,1 }, RecurrSpan.Month | RecurrSpan.Year, 
+				new[] { 13 }, RecurrSpan.Month | RecurrSpan.Year, 
 				DateTime.MinValue, DateTime.MaxValue, new DateTime (2015, 1, 1), new DateTime (2015, 4, 1),
 				"onIndexes[0]"),
 			new OnTestCase (
-				new[] { 53,1 }, RecurrSpan.Week | RecurrSpan.Year, 
+				new[] { 53 }, RecurrSpan.Week | RecurrSpan.Year, 
 				DateTime.MinValue, DateTime.MaxValue, new DateTime (2015, 1, 1), new DateTime (2015, 4, 1),
 				"onIndexes[0]"),
 			new OnTestCase (
-				new[] { 5,1 }, RecurrSpan.Week | RecurrSpan.Month, 
+				new[] { 5 }, RecurrSpan.Week | RecurrSpan.Month, 
 				DateTime.MinValue, DateTime.MaxValue, new DateTime (2015, 1, 1), new DateTime (2015, 4, 1),
 				"onIndexes[0]"),
 			new OnTestCase (
-				new[] { 366,1 }, RecurrSpan.Day | RecurrSpan.Year, 
+				new[] { 366 }, RecurrSpan.Day | RecurrSpan.Year, 
 				DateTime.MinValue, DateTime.MaxValue, new DateTime (2015, 1, 1), new DateTime (2015, 4, 1),
 				"onIndexes[0]"),
 			new OnTestCase (
-				new[] { 29,1 }, RecurrSpan.Day | RecurrSpan.Month, 
+				new[] { 29 }, RecurrSpan.Day | RecurrSpan.Month, 
 				DateTime.MinValue, DateTime.MaxValue, new DateTime (2015, 1, 1), new DateTime (2015, 4, 1),
 				"onIndexes[0]"),
 			new OnTestCase (
-				new[] { 8,1 }, RecurrSpan.Day | RecurrSpan.Week, 
+				new[] { 8 }, RecurrSpan.Day | RecurrSpan.Week, 
 				DateTime.MinValue, DateTime.MaxValue, new DateTime (2015, 1, 1), new DateTime (2015, 4, 1),
 				"onIndexes[0]"),
 			new OnTestCase (
-				new[] { 0,1 }, RecurrSpan.Day | RecurrSpan.Month, 
+				new[] { 0 }, RecurrSpan.Day | RecurrSpan.Month, 
 				DateTime.MinValue, DateTime.MaxValue, new DateTime (2015, 1, 1), new DateTime (2015, 4, 1),
 				"onIndexes[0]"),
 

@@ -129,7 +129,7 @@ namespace LibRTP
 			DateTime forming = RecurrsEveryPatternHelpers.Moduliser [units].ClosestToAt (FixedPoint, useStart, frequency);
 			if (forming < Start)
 				forming = RecurrsEveryPatternHelpers.Moduliser [units].NextValue (forming, FixedPoint, frequency);
-			while (forming <= useEnd) {
+			while (forming < useEnd) {
 				yield return forming;
 				forming = RecurrsEveryPatternHelpers.Moduliser [units].NextValue (forming, FixedPoint, frequency);
 			}
