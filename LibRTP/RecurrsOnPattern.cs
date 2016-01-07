@@ -1,9 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using LibSharpHelp;
 
 namespace LibRTP
 {
+	public class OnPatternArgumentException : ArgumentException
+	{
+		public OnPatternArgumentException(String msg, String arg) : base(msg,arg) {}
+	}
 	delegate DateTime DateTimeShifter(DateTime src, int val);
 	delegate DateTime DateTimeIncrementor(DateTime src);
 	class RUI {
@@ -65,23 +70,46 @@ namespace LibRTP
 		// so there must always be one more flag set than length of indexes.
 		public RecurrsOnPattern (int[] onIndexes, RecurrSpan unitsMask, DateTime? patternStart, DateTime? patternEnd)
 		{
-			if(onIndexes.Length == 0) throw new ArgumentException("There must be some indexes specified", "onIndexes.Length");
+			// assert validity
+			OnPatternArgumentException error;
+			if(!IsValid(onIndexes,unitsMask, patternStart, patternEnd, out error))
+				throw error;
+			
+			// Ok, we can give you an object.
+			this.units = new List<RecurrSpan> (unitsMask.SplitFlags ());
+			this.onIndexes = onIndexes;
+			PatternStarts = patternStart;
+			PatternEnds = patternEnd;
+		}
+
+		static bool IsValid(int[] onIndexes, RecurrSpan unitsMask, DateTime? patternStart, DateTime? patternEnd)
+		{
+			OnPatternArgumentException ex;
+			return IsValid (onIndexes, unitsMask, patternStart, patternEnd, out ex);
+		}
+		static bool IsValid(int[] onIndexes, RecurrSpan unitsMask, DateTime? patternStart, DateTime? patternEnd, out OnPatternArgumentException error)
+		{
+			if (onIndexes.Length == 0) {
+				error = new OnPatternArgumentException ("There must be some indexes specified", "onIndexes.Length");
+				return false;
+			}
 
 			// Get split list of flags (backing down not dealing directly with the mask :-(, but cant think how right now)
 			List<RecurrSpan> unitsLocal = new List<RecurrSpan> (unitsMask.SplitFlags ());
 
 			// there must be an "onindex" for each present in the onUnitsMask, not more not less.
-			if(unitsLocal.Count-1 != onIndexes.Length) throw new ArgumentException("Number of indexes be one less than number of flags set in the mask. (1,3) (day|year) means first day of year every 3 years or (4,5)(week|month) start of every 4th week of every fifth month. ", "unitsMask");
+			if (unitsLocal.Count - 1 != onIndexes.Length) {
+				error = new OnPatternArgumentException ("Number of indexes be one less than number of flags set in the mask. (1,3) (day|year) means first day of year every 3 years or (4,5)(week|month) start of every 4th week of every fifth month. ", "unitsMask");
+				return false;
+			}
 			// we gotta make sure that each "on" staisfies the allowable maximum for the span type.
 			for (int i = 0; i < unitsLocal.Count - 1; i++)
-				if (onIndexes [i] > RecurrsOnPatternHelpers.Units [unitsLocal [i] | unitsLocal [i + 1]].MaxValue || onIndexes[i] <=0)
-					throw new ArgumentException ("cant repeat on the " + onIndexes [i] + " " + unitsLocal[i] + " of every " + unitsLocal [i + 1], "onIndexes[" + i + "]");
-
-			// Ok, we can give you an object.
-			this.units = unitsLocal;
-			this.onIndexes = onIndexes;
-			PatternStarts = patternStart;
-			PatternEnds = patternEnd;
+				if (onIndexes [i] > RecurrsOnPatternHelpers.Units [unitsLocal [i] | unitsLocal [i + 1]].MaxValue || onIndexes [i] <= 0) {
+					error = new OnPatternArgumentException ("cant repeat on the " + onIndexes [i] + " " + unitsLocal [i] + " of every " + unitsLocal [i + 1], "onIndexes[" + i + "]");
+					return false;
+				}
+			error = null;
+			return true;
 		}
 
 		public byte[] ToBinary()
@@ -104,21 +132,35 @@ namespace LibRTP
 				return ms.ToArray ();
 			}
 		}
-		public static RecurrsOnPattern FromBinary(byte[] data)
+		public static bool TryFromBinary(byte[] data, out IRecurr value)
 		{
 			using (var ms = new MemoryStream (data))
-			using (var br = new BinaryReader (ms)) {
-				int indexes = br.ReadInt32 ();
+			using (var br = new StreamReadingHelper (ms)) {
+				value = null;
+
+				int indexes; if(!br.TryRead(out indexes)) return false;
+
 				List<int> onIndexes = new List<int> ();
 				for (int i = 0; i < indexes; i++)
-					onIndexes.Add (br.ReadInt32 ());
-				uint umask = br.ReadUInt32 ();
+					if (!br.TryRead<int> (onIndexes.Add))
+						return false;
+
+				uint umask; if (!br.TryRead (out umask)) return false;
+
+				bool has;
 				DateTime? ps= null, pe = null;
-				if (br.ReadBoolean ())
-					ps = DateTime.FromBinary (br.ReadInt64 ());
-				if (br.ReadBoolean ())
-					pe = DateTime.FromBinary (br.ReadInt64 ());
-				return new RecurrsOnPattern (onIndexes.ToArray (), (RecurrSpan)umask, ps, pe);
+				if (!br.TryRead (out has)) return false;
+				if (has && !br.TryRead ((long dt) => ps = DateTime.FromBinary (dt)))
+					return false;
+				if (!br.TryRead (out has)) return false;
+				if (has && !br.TryRead ((long dt) => pe = DateTime.FromBinary (dt)))
+					return false;
+				
+				if(!RecurrsOnPattern.IsValid(onIndexes.ToArray(),  (RecurrSpan)umask, ps, pe))
+					return false;
+
+				value = new RecurrsOnPattern (onIndexes.ToArray (), (RecurrSpan)umask, ps, pe);
+				return true;
 			}
 		}
 

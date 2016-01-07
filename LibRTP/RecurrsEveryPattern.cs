@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using LibSharpHelp;
 
 namespace LibRTP
 {
@@ -106,19 +107,33 @@ namespace LibRTP
 				return ms.ToArray ();
 			}
 		}
-		public static RecurrsEveryPattern FromBinary(byte[] data)
+		public static bool TryFromBinary(byte[] data, out IRecurr value)
 		{
 			using (MemoryStream ms = new MemoryStream (data))
-			using (BinaryReader br = new BinaryReader (ms)) {
-				var fp = DateTime.FromBinary (br.ReadInt64 ());
-				var frq = br.ReadInt32 ();
-				var units = (RecurrSpan)br.ReadUInt32 ();
-				DateTime? lb = null, ub = null;
-				if (br.ReadBoolean ())
-					lb = DateTime.FromBinary (br.ReadInt64 ());
-				if (br.ReadBoolean ())
-					ub = DateTime.FromBinary (br.ReadInt64 ());
-				return new RecurrsEveryPattern (fp, frq, units, lb, ub);
+			using (var br = new StreamReadingHelper(ms)) {
+				value = null;
+
+				DateTime fp = DateTime.MinValue; 
+				if (!br.TryRead ((long fpv) => fp = DateTime.FromBinary (fpv)))
+					return false;
+				
+				int frq;
+				if (!br.TryRead (out frq))
+					return false;
+
+				uint units; if (!br.TryRead (out units)) return false;
+
+				bool has;
+				DateTime? lb= null, ub = null;
+				if (!br.TryRead (out has)) return false;
+				if (has && !br.TryRead ((long dt) => lb = DateTime.FromBinary (dt)))
+					return false;
+				if (!br.TryRead (out has)) return false;
+				if (has && !br.TryRead ((long dt) => ub = DateTime.FromBinary (dt)))
+					return false;
+
+				value = new RecurrsEveryPattern (fp, frq, (RecurrSpan)units, lb, ub);
+				return true;
 			}
 		}
 		#region IRecurr implementation
