@@ -27,6 +27,17 @@ namespace LibRTP
 				compare *= 2; // next flag...
 			}
 		}
+		public static String AsString(this RecurrSpan spn)
+		{
+			switch (spn) 
+			{
+				case RecurrSpan.Day: return "Day";
+				case RecurrSpan.Week: return "Week";
+				case RecurrSpan.Month: return "Month";
+				case RecurrSpan.Year: return "Year";
+				default: throw new ArgumentException ();
+			}
+		}
 	}
 
 	static class OurHelpers
