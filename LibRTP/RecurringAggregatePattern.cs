@@ -4,6 +4,7 @@ using System.Text;
 
 namespace LibRTP
 {
+    // OK SO: DaysFromStart = 0 means just one day, DaysEitherSide=0 is the same thing.
 	public enum AggregateRangeType { DaysFromStart = 1, DaysEitherSide = 2 }
 	public class RecurringAggregatePattern
 	{
@@ -76,7 +77,9 @@ namespace LibRTP
 			}
 			return new DayTargetReturn (useStart, useEnd, targ);
 		}
-	}
+
+        
+    }
 	public struct DayTargetReturn {
 		public readonly DateTime begin;
 		public readonly DateTime end;
@@ -89,7 +92,7 @@ namespace LibRTP
 		}
 		public override string ToString ()
 		{
-			return String.Format ("{0} to {1}: {2}", begin.ToShortDateString(), end.ToShortDateString(), target); 
+			return String.Format ("{0} to {1}: {2}", begin.ToString("dd/MM/yyyy"), end.ToString("dd/MM/yyyy"), target); 
 		}
 	}
 }
