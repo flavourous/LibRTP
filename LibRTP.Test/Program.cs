@@ -280,27 +280,31 @@ namespace LibRTP.Test
 		}
 		List<TestCase> cases = new List<TestCase> {
 			// Some on-every test cases...
-			new EveryTestCase(new DateTime(2015,2,12),1,RecurrSpan.Day,null,null,new DateTime(1950,1,1),new DateTime(1950,1,6),
-				new[] { new DateTime(1950,1,1),new DateTime(1950,1,2),new DateTime(1950,1,3),new DateTime(1950,1,4),new DateTime(1950,1,5) }
-			),
-			new EveryTestCase(new DateTime(2015,2,3),1,RecurrSpan.Week,null,null,new DateTime(2015,2,10),new DateTime(2015,2,25),
-				new[] {new DateTime(2015,2,10),new DateTime(2015,2,17),new DateTime(2015,2,24) }
-			),
-			new EveryTestCase(new DateTime(2014,2,3),1,RecurrSpan.Month,null,null,new DateTime(2018,1,1),new DateTime(2018,4,2),
-				new[] {new DateTime(2018,1,3),new DateTime(2018,2,3),new DateTime(2018,3,3),}
-			),
+            // check we dont lose the least significant part! 
+			new EveryTestCase(new DateTime(2015,2,12,4,0,0),1,RecurrSpan.Day,null,null,new DateTime(1950,1,1),new DateTime(1950,1,6),
+                new[] { new DateTime(1950,1,1,4,0,0),new DateTime(1950,1,2,4,0,0),new DateTime(1950,1,3,4,0,0),new DateTime(1950,1,4,4,0,0),new DateTime(1950,1,5,4,0,0) }
+            ),
+            new EveryTestCase(new DateTime(2015,2,2,4,0,0),1,RecurrSpan.Day,null,null,new DateTime(2015,2,10),new DateTime(2015,2,12,10,0,0),
+                new[] { new DateTime(2015,2,10,4,0,0),new DateTime(2015,2,11,4,0,0),new DateTime(2015,2,12,4,0,0), }
+            ),
+            new EveryTestCase(new DateTime(2015,2,3,4,0,0),1,RecurrSpan.Week,null,null,new DateTime(2015,2,10),new DateTime(2015,2,25),
+                new[] {new DateTime(2015,2,10,4,0,0),new DateTime(2015,2,17,4,0,0),new DateTime(2015,2,24,4,0,0) }
+            ),
+            new EveryTestCase(new DateTime(2014,2,3,4,0,0),1,RecurrSpan.Month,null,null,new DateTime(2018,1,1),new DateTime(2018,4,2),
+                new[] {new DateTime(2018,1,3,4,0,0),new DateTime(2018,2,3,4,0,0),new DateTime(2018,3,3,4,0,0),}
+            ),
 			// leap year handling madness
-			new EveryTestCase(new DateTime(2012,2,29),1,RecurrSpan.Year,null,null,new DateTime(2018,1,1),new DateTime(2022,1,2),
-				new[] {new DateTime(2018,3,1),new DateTime(2019,3,1),new DateTime(2020,2,29),new DateTime(2021,3,1)}
-			),
+			new EveryTestCase(new DateTime(2012,2,29,4,0,0),1,RecurrSpan.Year,null,null,new DateTime(2018,1,1),new DateTime(2022,1,2),
+                new[] {new DateTime(2018,3,1,4,0,0),new DateTime(2019,3,1,4,0,0),new DateTime(2020,2,29,4,0,0),new DateTime(2021,3,1,4,0,0)}
+            ),
 			// impossible month handling
 			new EveryTestCase(new DateTime(2010,1,31),1,RecurrSpan.Month,null,null,new DateTime(2012,1,1),new DateTime(2012,5,2),
-				new[] {new DateTime(2012,1,31),new DateTime(2012,2,29),new DateTime(2012,3,31),new DateTime(2012,4,30)}
-			),
+                new[] {new DateTime(2012,1,31),new DateTime(2012,2,29),new DateTime(2012,3,31),new DateTime(2012,4,30)}
+            ),
 			// detect long range code changes at aleast...didnt confirm if correct! lol.
 			new EveryTestCase(new DateTime(2015,2,12),1,RecurrSpan.Week,null,null,new DateTime(1950,1,1),new DateTime(1950,1,21),
-				new[] { new DateTime(1950,1,4),new DateTime(1950,1,11),new DateTime(1950,1,18) }
-			),
+                new[] { new DateTime(1950,1,4),new DateTime(1950,1,11),new DateTime(1950,1,18) }
+            ),
 			//thatll do for nows.
 		};
 		List<TestCase> failedContracts = new List<TestCase> {

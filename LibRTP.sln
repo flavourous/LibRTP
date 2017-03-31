@@ -1,19 +1,33 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibRTP.Test", "LibRTP.Test\LibRTP.Test.csproj", "{B1723787-D708-4B2C-BBBA-B01A5A1DFC7B}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "LibRTP", "LibRTP\LibRTP.shproj", "{1C3091EB-5350-48F8-AA8A-51E7D4656DA0}"
 EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		LibRTP\LibRTP.projitems*{1c3091eb-5350-48f8-aa8a-51e7d4656da0}*SharedItemsImports = 13
+		LibRTP\LibRTP.projitems*{b1723787-d708-4b2c-bbba-b01a5a1dfc7b}*SharedItemsImports = 4
+		..\LibSharpHelp\LibSharpHelp.projitems*{b1723787-d708-4b2c-bbba-b01a5a1dfc7b}*SharedItemsImports = 4
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
 		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B1723787-D708-4B2C-BBBA-B01A5A1DFC7B}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{B1723787-D708-4B2C-BBBA-B01A5A1DFC7B}.Debug|x86.ActiveCfg = Debug|x86
 		{B1723787-D708-4B2C-BBBA-B01A5A1DFC7B}.Debug|x86.Build.0 = Debug|x86
+		{B1723787-D708-4B2C-BBBA-B01A5A1DFC7B}.Release|Any CPU.ActiveCfg = Release|x86
 		{B1723787-D708-4B2C-BBBA-B01A5A1DFC7B}.Release|x86.ActiveCfg = Release|x86
 		{B1723787-D708-4B2C-BBBA-B01A5A1DFC7B}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal

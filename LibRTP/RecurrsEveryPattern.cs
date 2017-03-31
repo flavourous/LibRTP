@@ -20,11 +20,19 @@ namespace LibRTP
 		// this one is the the "every" types.  We have a method to modulo the closest repetition from a fixed date to a chosen date
 		public static Dictionary<RecurrSpan,RMOD> Moduliser = new Dictionary<RecurrSpan, RMOD> {
 			{ RecurrSpan.Day, new RMOD(
-				(fixedDate, atDate, f) => atDate.AddDays((int)(atDate - fixedDate).TotalDays % f),
+				(fixedDate, atDate, f) => 
+                {
+                    return atDate.AddDays((int)(atDate - fixedDate).TotalDays % f).Add(fixedDate.TimeOfDay);
+                },
 				(d, f, v) => d.AddDays(v)
 			)},
 			{ RecurrSpan.Week, new RMOD(
-				(fixedDate, atDate, f) => atDate.AddDays((int)(atDate - fixedDate).TotalDays % 7*f),
+				(fixedDate, atDate, f) => 
+                {
+                    var tdd = atDate.DayOfWeek - fixedDate.DayOfWeek;
+                    var rem = tdd % 7*f;
+                    return atDate.AddDays(rem).Add(fixedDate.TimeOfDay);
+                },
 				(d,f, v) => d.AddDays(v*7)
 			)},
 			{ RecurrSpan.Month, new RMOD(
@@ -42,9 +50,7 @@ namespace LibRTP
 						if(ydiff > 0) monthdiff += 12 - fixedDate.Month + atDate.Month;
 						if(ydiff < 0) monthdiff -= 12 - atDate.Month + fixedDate.Month; // its also a negative value.
 					}
-					DateTime closestMonth = new DateTime(atDate.Year, atDate.Month, fixedDate.Day);
-					atDate.AddMonths(monthdiff % f);
-					return closestMonth;
+					return new DateTime(atDate.Year, atDate.Month, fixedDate.Day).Add(fixedDate.TimeOfDay);
 				},
 				(d,f, v) => {
 					var ret = d.AddMonths(v);
@@ -60,7 +66,7 @@ namespace LibRTP
 			{ RecurrSpan.Year, new RMOD(
 				(fixedDate, atDate, f) => {
 					int closestYear =atDate.Year+ (atDate.Year - fixedDate.Year) % f;
-					return new DateTime(closestYear, 1,1).AddDays(fixedDate.DayOfYear - 1);
+					return new DateTime(closestYear, 1,1).AddDays(fixedDate.DayOfYear - 1).Add(fixedDate.TimeOfDay);
 				}, 
 				(d,f,v) => {
 					var ret = d.AddYears(v);
