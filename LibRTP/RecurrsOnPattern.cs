@@ -10,7 +10,7 @@ namespace LibRTP
 		public OnPatternArgumentException(String msg, String arg) : base(msg,arg) {}
 	}
 	delegate DateTime DateTimeShifter(DateTime src, int val);
-	delegate DateTime DateTimeIncrementor(DateTime src);
+	delegate DateTime DateTimeIncrementor(DateTime src, int n );
 	class RUI {
 		public readonly int MaxValue;
 		public readonly DateTimeShifter CreateAtValue;
@@ -29,31 +29,31 @@ namespace LibRTP
 		public static Dictionary<RecurrSpan,RUI> Units = new Dictionary<RecurrSpan, RUI> {
 			{ RecurrSpan.Year  | RecurrSpan.Month, new RUI (12, 
 				(d, v) => d.AddMonths (v - d.Month),
-				d => d.AddYears(1)
+				(d,n) => d.AddYears(n)
 			)},
 			{ RecurrSpan.Year  | RecurrSpan.Week, new RUI (52,
 				(d, v) => d.FirstWeekOfYear().AddDays(7*(v-1)),
-				d => {
-					var firstWeekOfNextYear = d.AddYears(1).FirstWeekOfYear();
+				(d,n) => {
+					var firstWeekOfNextYear = d.AddYears(n).FirstWeekOfYear();
 					var zeroBasedWeekOfFirstYear = (d.DayOfYear - d.FirstWeekOfYear().DayOfYear)/7; // should be integral.
 					return firstWeekOfNextYear.AddDays(zeroBasedWeekOfFirstYear*7);
 				}
 			)},
 			{ RecurrSpan.Year  | RecurrSpan.Day, new RUI (365, 
 				(d, v) => d.AddDays (v - d.DayOfYear),
-				d => d.AddYears(1)
+                (d,n) => d.AddYears(n)
 			)},
 			{ RecurrSpan.Month | RecurrSpan.Week, new RUI (4, 
 				(d, v) => d.AddDays (v * 7 - d.Day),
-				d => d.AddMonths(1)
+                (d,n) => d.AddMonths(n)
 			)},
 			{ RecurrSpan.Month | RecurrSpan.Day, new RUI (28, 
 				(d, v) => d.AddDays (v - d.Day),
-				d => d.AddMonths(1)
+                (d,n) => d.AddMonths(n)
 			)},
 			{ RecurrSpan.Week  | RecurrSpan.Day, new RUI (7, 
 				(d, v) => d.AddDays (v - (d.DayOfWeekStartingMonday()+1) ),
-				d => d.AddDays(7)
+                (d,n) => d.AddDays(7*n)
 			)},
 		};
 	}
@@ -98,8 +98,8 @@ namespace LibRTP
 			List<RecurrSpan> unitsLocal = new List<RecurrSpan> (unitsMask.SplitFlags ());
 
 			// there must be an "onindex" for each present in the onUnitsMask, not more not less.
-			if (unitsLocal.Count - 1 != onIndexes.Length) {
-				error = new OnPatternArgumentException ("Number of indexes be one less than number of flags set in the mask. (1,3) (day|year) means first day of year every 3 years or (4,5)(week|month) start of every 4th week of every fifth month. ", "unitsMask");
+			if (unitsLocal.Count != onIndexes.Length) {
+				error = new OnPatternArgumentException ("Number of indexes be equal to number of flags set in the mask. (1,3) (day|year) means first day of year every 3 years or (4,5)(week|month) start of every 4th week of every fifth month. ", "unitsMask");
 				return false;
 			}
 			// we gotta make sure that each "on" staisfies the allowable maximum for the span type.
@@ -176,15 +176,16 @@ namespace LibRTP
 			// and any other combinaton you can think of.
 			DateTime forming = Start;
 			DateTime startTrack = Start;
-			for (int i = onIndexes.Length-1; i >=0;i--)
+			for (int i = onIndexes.Length-2; i >=0;i--)
 				forming = RecurrsOnPatternHelpers.Units [units [i+1] | units [i]].CreateAtValue (forming, onIndexes [i]);
+            int skip = onIndexes[onIndexes.Length - 1];
 
 			Action Incrementor = () => {
 				bool inc = true;
-				for (int i = onIndexes.Length-1; i >=0;i--) 
+				for (int i = onIndexes.Length-2; i >=0;i--) 
 				{
 					var use = RecurrsOnPatternHelpers.Units[units [i+1] | units [i]];
-					if(inc) forming = startTrack = use.NextValue(startTrack);
+					if(inc) forming = startTrack = use.NextValue(startTrack, skip);
 					forming = use.CreateAtValue(forming, onIndexes[i]);
 					inc = false; // now use createat to position correctly.
 				}
