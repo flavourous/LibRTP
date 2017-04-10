@@ -76,7 +76,7 @@ namespace LibRTP
 				throw error;
 			
 			// Ok, we can give you an object.
-			this.units = new List<RecurrSpan> (unitsMask.SplitFlags ());
+			this.units = new List<RecurrSpan> (((uint)unitsMask).SplitFlags<RecurrSpan> ());
 			this.onIndexes = onIndexes;
 			PatternStarts = patternStart;
 			PatternEnds = patternEnd;
@@ -95,7 +95,7 @@ namespace LibRTP
 			}
 
 			// Get split list of flags (backing down not dealing directly with the mask :-(, but cant think how right now)
-			List<RecurrSpan> unitsLocal = new List<RecurrSpan> (unitsMask.SplitFlags ());
+			List<RecurrSpan> unitsLocal = new List<RecurrSpan> (((uint)unitsMask).SplitFlags<RecurrSpan> ());
 
 			// there must be an "onindex" for each present in the onUnitsMask, not more not less.
 			if (unitsLocal.Count != onIndexes.Length) {
