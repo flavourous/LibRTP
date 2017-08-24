@@ -251,6 +251,19 @@ namespace LibRTP.Test
             new EveryTestCase(new DateTime(2014,2,3,4,0,0),1,RecurrSpan.Month,null,null,new DateTime(2017,12,20),new DateTime(2018,4,2),
                 new[] {new DateTime(2018,1,3,4,0,0),new DateTime(2018,2,3,4,0,0),new DateTime(2018,3,3,4,0,0),}
             ) { name = "ShiftedStart-months" },
+            // with complex multipliers, rather than 1.  We'll shift the starts too cause why not.
+            new EveryTestCase(new DateTime(2017,8,22,8,0,0),27,RecurrSpan.Day,null,null,new DateTime(2017,8,25),new DateTime(2017,10,16),
+                new[] { new DateTime(2017,9,18,8,0,0), new DateTime(2017,10,15,8,0,0) }
+            ) { name = "BigMult days" },
+            new EveryTestCase(new DateTime(2015,2,3,4,0,0),7,RecurrSpan.Week,null,null,new DateTime(2015,2,14),new DateTime(2015,8,4),
+                new[] {new DateTime(2015,3,24,4,0,0),new DateTime(2015,5,12,4,0,0),new DateTime(2015,6,30,4,0,0) }
+            ) { name = "BigMult weeks" },
+            new EveryTestCase(new DateTime(2014,2,3,4,0,0),14,RecurrSpan.Month,null,null,new DateTime(2016,6,1),new DateTime(2018,12,1),
+                new[] {new DateTime(2016,6,3,4,0,0),new DateTime(2017,8,3,4,0,0),new DateTime(2018,10,3,4,0,0),}
+            ) { name = "BigMult months" },
+            new EveryTestCase(new DateTime(2020,2,3,4,0,0),3,RecurrSpan.Year,null,null,new DateTime(2020,12,20),new DateTime(2030,4,2),
+                new[] {new DateTime(2023,2,3,4,0,0),new DateTime(2026,2,3,4,0,0),new DateTime(2029,2,3,4,0,0),}
+            ) { name = "BigMult years" },
 			// leap year handling madness
 			new EveryTestCase(new DateTime(2012,2,29,4,0,0),1,RecurrSpan.Year,null,null,new DateTime(2018,1,1),new DateTime(2022,1,2),
                 new[] {new DateTime(2018,3,1,4,0,0),new DateTime(2019,3,1,4,0,0),new DateTime(2020,2,29,4,0,0),new DateTime(2021,3,1,4,0,0)}
