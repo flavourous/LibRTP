@@ -22,15 +22,16 @@ namespace LibRTP
 			{ RecurrSpan.Day, new RMOD(
 				(fixedDate, atDate, f) => 
                 {
-                    return atDate.AddDays((int)(atDate - fixedDate).TotalDays % f).Add(fixedDate.TimeOfDay);
+                    var td=  fixedDate.StartOfDay()-atDate.StartOfDay();
+                    return atDate.AddDays((int)(td).TotalDays % f).Add(fixedDate.TimeOfDay);
                 },
 				(d, f, v) => d.AddDays(v)
 			)},
 			{ RecurrSpan.Week, new RMOD(
 				(fixedDate, atDate, f) => 
                 {
-                    var tdd = atDate.DayOfWeek - fixedDate.DayOfWeek;
-                    var rem = tdd % 7*f;
+                    var tdd =  fixedDate.StartOfDay()-atDate.StartOfDay();
+                    var rem = tdd.TotalDays % (7*f);
                     return atDate.AddDays(rem).Add(fixedDate.TimeOfDay);
                 },
 				(d,f, v) => d.AddDays(v*7)
