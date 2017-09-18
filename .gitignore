@@ -1,3 +1,6 @@
 LibRTP.Test/bin/
 LibRTP.Test/obj/
 LibRTP.userprefs
+**.user
+packages
+.vs
