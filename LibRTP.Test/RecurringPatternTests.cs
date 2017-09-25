@@ -53,15 +53,15 @@ namespace LibRTP.Test
         [Test]
         public void TestFirstWeekOfMonth()
         {
-            var wm = PublicHelpers.FirstWeekOfMonth(new DateTime(2015, 2, 1), WeekStartConfig.Unary);
+            var wm = PatternHelpers.StartOfWeek(new DateTime(2015, 2, 1));
             Assert.AreEqual(new DateTime(2015, 2, 1), wm);
         }
         [Test]
         public void LastWeekOfYear()
         {
             // weekstart whole. i.e. starts 1st jan, ramainter divisible is last week.
-            var wy = PatternHelpers.WeeksInYear(2014);
-            var dy = PatternHelpers.DaysInYear(2014);
+            var wy = PatternHelpers.WeeksInYear(2014, 1);
+            var dy = PatternHelpers.DaysInYear(2014, 1);
             // days at end of year that arent a complete week
             var p7 = dy % 7;
             // how far from year end the start of that period is (or, it's a whole week)
@@ -82,8 +82,7 @@ namespace LibRTP.Test
         public void ValidateOnOfs(vool.voo c)
         {
             var oea = PatternHelpers.ParsePattern(c.pat);
-            var mm = PatternHelpers.SplitEveryPattern(oea.every, oea.on.Length);
-            var vv = PatternHelpers.ValidateOnOf(oea.on, mm.minutes, mm.months, oea.at);
+            var vv = PatternHelpers.ValidateOnOf(oea.on, oea.every, oea.at);
             Assert.AreEqual(c.exp, vv.success, vv.error);
         }
     }
