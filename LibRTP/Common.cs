@@ -25,11 +25,7 @@ namespace LibRTP
         {
             return new DateTime(somit.Year, somit.Month, somit.Day);
         }
-        public static DateTime FirstDayOfWeek(this DateTime value)
-        {
-            var d1 = new DateTime(value.Year, value.Month, value.Day);
-            return d1.AddDays(-d1.DayOfWeekStartingMonday());
-        }
+        
         public static int DayOfWeekStartingMonday(this DateTime d)
         {
             return (d.DayOfWeek == 0 ? 6 : (int)d.DayOfWeek - 1);

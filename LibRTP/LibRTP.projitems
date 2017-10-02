@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Common.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ModulusHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RecurringPattern.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RecurringAggregatePattern.cs" />
   </ItemGroup>
