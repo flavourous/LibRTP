@@ -245,7 +245,7 @@ namespace LibRTP
 
                 // Continue forming, and if beyond the bridge, check we're not beyond the caluclate at
                 forming = units.CreateAtValue(forming, the, mult);
-                if (beyondBridge && forming > maxAt)
+                if (beyondBridge && forming >= maxAt)
                     return (false, string.Format("{0} {1} of {2} moves beyond {3}", on, the, of, maxAt));
 
                 // Calculate the max & check limits

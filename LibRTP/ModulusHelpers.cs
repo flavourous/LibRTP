@@ -114,9 +114,9 @@ namespace LibRTP
                 var msi = ms + i;
                 var m12 = msi % 12;
                 var tw = det(ys + (msi - 1) / 12, m12 == 0 ? 12 : m12) - tail;
-                var fw = Math.Floor(tw);
-                tail = tw - fw;
-                tot += fw * fac;
+                var cw = Math.Ceiling(tw);
+                tail = cw - tw;
+                tot += cw * fac;
             }
             return (int)tot;
         }
@@ -128,9 +128,9 @@ namespace LibRTP
             while ((amt = det(lys, lms) - tail) <= trg)
             {
                 div++;
-                var fam = Math.Floor(amt);
-                tail = amt - fam;
-                amt = fam;
+                var cam = Math.Ceiling(amt);
+                tail = cam - amt;
+                amt = cam;
                 trg -= amt;
                 lms++;
                 if (lms == 13)
@@ -149,9 +149,9 @@ namespace LibRTP
             for (int i = 0; i < x; i++)
             {
                 var tw = det(ys + i, ms) - tail;
-                var fw = Math.Floor(tw);
-                tail = tw - fw;
-                tot += fw * fac;
+                var cw = Math.Ceiling(tw);
+                tail = cw - tw;
+                tot += cw * fac;
             }
             return (int)tot;
         }
@@ -164,9 +164,9 @@ namespace LibRTP
             while ((amt = det(lys, ms) - tail) <= trg)
             {
                 div++;
-                var fam = Math.Floor(amt);
-                tail = amt - fam;
-                amt = fam;
+                var cam = Math.Ceiling(amt);
+                tail = cam - amt;
+                amt = cam;
                 trg -= amt;
                 lys++;
             }

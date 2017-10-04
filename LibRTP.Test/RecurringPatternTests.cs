@@ -91,7 +91,7 @@ namespace LibRTP.Test
             var units = PatternHelpers.Units[RSpan.Week | RSpan.Month];
             var at = new DateTime(2015, 4, 1);
             var wl = units.CreateAtValue(at, -1, 3);
-            Assert.AreEqual(wl, at.AddDays(7 * 14));
+            Assert.AreEqual(wl, at.AddDays(7 * 12));
         }
         [Test]
         public void MaxWeeksMult()
@@ -105,13 +105,28 @@ namespace LibRTP.Test
         {
             var units = PatternHelpers.Units[RSpan.Week | RSpan.Month];
             var div = units.DivideValue(2015, 4, 12);
-            Assert.AreEqual(1, div.rem); // 1 week remaining in month
+            Assert.AreEqual(2, div.div); // 2 months covered
+            Assert.AreEqual(3, div.rem); // 3 weeks into 3rd month
+        }
+
+        [Test]
+        public void Valwk()
+        {
+            var p = PatternHelpers.ParsePattern("0 0 1 14 | 3 _ @ 1 2016");
+            PartsVisitor pv = new PartsVisitor(p.on, p.every, p.at);
+            var voo = pv.ValidateOnOf(p.on, p.every, p.at);
+            Assert.IsFalse(voo.success);
         }
 
         [Test,TestCaseSource("WeeksInMonthData")]
         public void WeeksInMonth(int[] x)
         {
-            Assert.AreEqual(x[2], (int)ModulusHelpers.WeeksInMonth(x[0], x[1]), String.Format("Weeks in {0}/{1} should be {2}", x[0], x[1], x[2]));
+            Assert.AreEqual(x[2], Math.Ceiling(ModulusHelpers.WeeksInMonth(x[0], x[1])), String.Format("Weeks in {0}/{1} should be {2}", x[0], x[1], x[2]));
+            var maxer = ModulusHelpers.WkMonMaxer(ModulusHelpers.WeeksInMonth, x[0], x[1], 1, 1);
+            Assert.AreEqual(x[2], maxer);
+            var dv = ModulusHelpers.WkMonDivider(ModulusHelpers.WeeksInMonth, x[0], x[1], x[2], 1);
+            Assert.AreEqual(1, dv.Item1);
+            Assert.AreEqual(0, dv.Item2);
         }
 
         public static IEnumerable<TestCaseData> WeeksInMonthData = new List<int[]>
