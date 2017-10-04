@@ -52,6 +52,8 @@ namespace LibRTP
         public static DateTime AddWeeksMinus1(DateTime d, int n) => d.AddDays(7 * (n - 1));
         public static DateTime AddMonthsMinus1(DateTime d, int n) => d.AddMonths(n - 1);
 
+        // FIXME: These can probabbly be generalized, but I didnt figure out how.
+
         public static int YearMaxer(DateTimeUniter det, int ys, int ms, int x, int fac)
         {
             double tot = 0;
